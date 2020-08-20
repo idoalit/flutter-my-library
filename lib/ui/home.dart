@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'package:bibliography/helpers/dbhelper.dart';
 import 'package:bibliography/models/biblio.dart';
 import 'package:bibliography/ui/entryform.dart';
+import 'package:bibliography/ui/pdfview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_conditional_rendering/conditional.dart';
 import 'package:flutter_tags/flutter_tags.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -38,10 +40,12 @@ class _HomeState extends State<Home> {
           )
         ],
       ),
-      body: biblioList.length < 1 ? emptyView() : RefreshIndicator(
-        onRefresh: updateListView,
-        child: createListView(),
-      ),
+      body: biblioList.length < 1
+          ? emptyView()
+          : RefreshIndicator(
+              onRefresh: updateListView,
+              child: createListView(),
+            ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           var biblio = await navigateToEntryForm(context, null);
@@ -248,6 +252,22 @@ class _HomeState extends State<Home> {
                               width: MediaQuery.of(context).size.width,
                               child: ButtonBar(
                                 children: <Widget>[
+                                  Conditional.single(
+                                      context: context,
+                                      conditionBuilder: (BuildContext context) => biblio.link != null,
+                                      widgetBuilder: (BuildContext context) => FlatButton(
+                                        textColor: Colors.grey,
+                                        child: Row(
+                                          children: <Widget>[
+                                            Icon(Icons.book),
+                                            Text('View book')
+                                          ],
+                                        ),
+                                        onPressed: () {
+                                          Navigator.push(context, MaterialPageRoute(builder: (context) => PdfView()));
+                                        },
+                                      ),
+                                      fallbackBuilder: (BuildContext context) => Text('')),
                                   FlatButton(
                                     textColor: Colors.grey,
                                     child: Row(

@@ -25,6 +25,7 @@ class EntryFormState extends State<EntryForm> {
   TextEditingController editionController = TextEditingController();
   TextEditingController notesController = TextEditingController();
   TextEditingController sourceController = TextEditingController();
+  TextEditingController linkController = TextEditingController();
   String typeValue = 'Book';
 
   @override
@@ -40,6 +41,7 @@ class EntryFormState extends State<EntryForm> {
       editionController.text = biblio.edition;
       sourceController.text = biblio.source;
       notesController.text = biblio.notes;
+      linkController.text = biblio.link;
       if(typeValue != biblio.type && biblio.type != null)
         setState(() {
           typeValue = biblio.type;
@@ -187,6 +189,18 @@ class EntryFormState extends State<EntryForm> {
             Padding(
               padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
               child: TextField(
+                controller: linkController,
+                keyboardType: TextInputType.url,
+                decoration: InputDecoration(
+                    labelText: 'Online Resources',
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5.0))),
+                onChanged: (value) {},
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
+              child: TextField(
                 controller: synopsisController,
                 keyboardType: TextInputType.multiline,
                 decoration: InputDecoration(
@@ -232,6 +246,7 @@ class EntryFormState extends State<EntryForm> {
           biblio.source = sourceController.text;
           biblio.notes = notesController.text;
           biblio.type = typeValue;
+          biblio.link = linkController.text;
 
           Navigator.pop(context, biblio);
         },

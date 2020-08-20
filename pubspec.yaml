@@ -27,6 +27,8 @@ dependencies:
   path:
   path_provider:
   flutter_tags:
+  flutter_plugin_pdf_viewer:
+  flutter_conditional_rendering:
 
 dev_dependencies:
   flutter_test:

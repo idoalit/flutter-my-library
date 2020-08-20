@@ -14,6 +14,7 @@ class Biblio {
   String _type;
   String _notes;
   String _source;
+  String _link;
 
   // constructor
   Biblio(this._id);
@@ -35,6 +36,7 @@ class Biblio {
     this._type = map['type'];
     this._notes = map['notes'];
     this._source = map['source'];
+    this._link = map['link'];
   }
 
   // getter & setter
@@ -110,6 +112,12 @@ class Biblio {
     _type = value;
   }
 
+  String get link => _link;
+
+  set link(String value) {
+    _link = value;
+  }
+
   // map conversion
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = Map<String, dynamic>();
@@ -125,6 +133,7 @@ class Biblio {
     map['type'] = type;
     map['source'] = source;
     map['notes'] = notes;
+    map['link'] = link;
     if (this._id == null)
       map['created_at'] = (new DateTime.now()).toIso8601String();
     map['updated_at'] = (new DateTime.now()).toIso8601String();

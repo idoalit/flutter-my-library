@@ -46,6 +46,7 @@ class DbHelper {
       "description"	TEXT,
       "notes"	TEXT,
       "source"	TEXT,
+      "link"	TEXT,
       "created_at"	TEXT,
       "updated_at"	TEXT,
       PRIMARY KEY("id" AUTOINCREMENT)
