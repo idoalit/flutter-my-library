@@ -29,6 +29,7 @@ dependencies:
   flutter_tags:
   flutter_plugin_pdf_viewer:
   flutter_conditional_rendering:
+  provider:
 
 dev_dependencies:
   flutter_test:
