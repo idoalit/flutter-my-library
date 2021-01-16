@@ -34,14 +34,14 @@ class _HomeState extends State<Home> {
               onRefresh: updateListView,
               child: createListView(),
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          var biblio = await navigateToEntryForm(context, null);
-          if (biblio != null && biblio.title != '') saveBiblio(biblio);
-        },
-        child: const Icon(Icons.add),
-        backgroundColor: Colors.pinkAccent,
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () async {
+      //     var biblio = await navigateToEntryForm(context, null);
+      //     if (biblio != null && biblio.title != '') saveBiblio(biblio);
+      //   },
+      //   child: const Icon(Icons.add),
+      //   backgroundColor: Colors.pinkAccent,
+      // ),
     );
   }
 
