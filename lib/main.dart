@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'view_model/counter.dart';
+import 'view_model/router.dart';
 
 void main() {
   runApp(
@@ -16,7 +17,10 @@ void main() {
       //
       // Read Provider's docs to learn about all the available providers.
       MultiProvider(
-    providers: [ChangeNotifierProvider(create: (context) => Counter())],
+    providers: [
+      ChangeNotifierProvider(create: (context) => Counter()),
+      ChangeNotifierProvider(create: (context) => PageRouter())
+    ],
     child: MyApp(),
   ));
 }
@@ -39,9 +43,31 @@ class MyHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'My Library',
-          style: TextStyle(color: Colors.black54),
+        title: Consumer<PageRouter>(
+          builder: (context, router, child) {
+
+            var pageTitle = 'My Library';
+
+            switch (router.currentPage) {
+              case PageRouter.FAVORITE_PAGE: {
+                pageTitle = 'Favorite';
+              }
+              break;
+              case PageRouter.SETTING_PAGE: {
+                pageTitle = 'Settings';
+              }
+              break;
+              case PageRouter.SEARCH_PAGE: {
+                pageTitle = 'Search';
+              }
+              break;
+            }
+
+            return Text(
+              pageTitle,
+              style: TextStyle(color: Colors.black54),
+            );
+          },
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -51,14 +77,14 @@ class MyHomePage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text('You have pushed the button this many times:'),
+            Text('Ini index halaman ke:'),
             // Consumer looks for an ancestor Provider widget
             // and retrieves its model (Counter, in this case).
             // Then it uses that model to build widgets, and will trigger
             // rebuilds if the model is updated.
-            Consumer<Counter>(
+            Consumer<PageRouter>(
               builder: (context, counter, child) => Text(
-                '${counter.value}',
+                '${counter.currentPage}',
                 style: Theme.of(context).textTheme.headline4,
               ),
             ),
@@ -86,24 +112,36 @@ class MyHomePage extends StatelessWidget {
           children: <Widget>[
             IconButton(
               icon: Icon(Icons.home),
-              color: Colors.redAccent,
-              onPressed: () {},
+              color: Colors.lightGreen,
+              onPressed: () {
+                var router = context.read<PageRouter>();
+                router.goto(PageRouter.HOME_PAGE);
+              },
             ),
             IconButton(
               icon: Icon(Icons.favorite),
-              color: Colors.lightGreen,
-              onPressed: () {},
+              color: Colors.redAccent,
+              onPressed: () {
+                var router = context.read<PageRouter>();
+                router.goto(PageRouter.FAVORITE_PAGE);
+              },
             ),
             Text(''),
             IconButton(
               icon: Icon(Icons.settings),
-              color: Colors.deepOrangeAccent,
-              onPressed: () {},
+              color: Colors.indigoAccent,
+              onPressed: () {
+                var router = context.read<PageRouter>();
+                router.goto(PageRouter.SETTING_PAGE);
+              },
             ),
             IconButton(
               icon: Icon(Icons.search),
-              color: Colors.indigo,
-              onPressed: () {},
+              color: Colors.deepOrange,
+              onPressed: () {
+                var router = context.read<PageRouter>();
+                router.goto(PageRouter.SEARCH_PAGE);
+              },
             ),
           ],
         ),
