@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:bibliography/ui/home.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -39,8 +40,12 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatelessWidget {
+
+  PageController _pageController = PageController();
+
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: Consumer<PageRouter>(
@@ -73,23 +78,13 @@ class MyHomePage extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text('Ini index halaman ke:'),
-            // Consumer looks for an ancestor Provider widget
-            // and retrieves its model (Counter, in this case).
-            // Then it uses that model to build widgets, and will trigger
-            // rebuilds if the model is updated.
-            Consumer<PageRouter>(
-              builder: (context, counter, child) => Text(
-                '${counter.currentPage}',
-                style: Theme.of(context).textTheme.headline4,
-              ),
-            ),
-          ],
-        ),
+      body: PageView(
+        controller: _pageController,
+        physics: NeverScrollableScrollPhysics(),
+        children: <Widget>[
+          Home(),
+          SecondRoute()
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -114,16 +109,14 @@ class MyHomePage extends StatelessWidget {
               icon: Icon(Icons.home),
               color: Colors.lightGreen,
               onPressed: () {
-                var router = context.read<PageRouter>();
-                router.goto(PageRouter.HOME_PAGE);
+                _pageController.jumpToPage(PageRouter.HOME_PAGE);
               },
             ),
             IconButton(
               icon: Icon(Icons.favorite),
               color: Colors.redAccent,
               onPressed: () {
-                var router = context.read<PageRouter>();
-                router.goto(PageRouter.FAVORITE_PAGE);
+                _pageController.jumpToPage(PageRouter.FAVORITE_PAGE);
               },
             ),
             Text(''),
@@ -131,16 +124,14 @@ class MyHomePage extends StatelessWidget {
               icon: Icon(Icons.settings),
               color: Colors.indigoAccent,
               onPressed: () {
-                var router = context.read<PageRouter>();
-                router.goto(PageRouter.SETTING_PAGE);
+                _pageController.jumpToPage(PageRouter.HOME_PAGE);
               },
             ),
             IconButton(
               icon: Icon(Icons.search),
               color: Colors.deepOrange,
               onPressed: () {
-                var router = context.read<PageRouter>();
-                router.goto(PageRouter.SEARCH_PAGE);
+                _pageController.jumpToPage(PageRouter.FAVORITE_PAGE);
               },
             ),
           ],
@@ -154,14 +145,9 @@ class SecondRoute extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Second Route"),
-      ),
       body: Center(
         child: ElevatedButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () {},
           child: Text('Go back!'),
         ),
       ),

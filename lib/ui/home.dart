@@ -28,18 +28,6 @@ class _HomeState extends State<Home> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('My Library'),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.search),
-            tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-            onPressed: () {
-              showSearch(context: context, delegate: BibliographySearch());
-            },
-          )
-        ],
-      ),
       body: biblioList.length < 1
           ? emptyView()
           : RefreshIndicator(
