@@ -2,25 +2,41 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_plugin_pdf_viewer/flutter_plugin_pdf_viewer.dart';
 
+// ignore: must_be_immutable
 class PdfView extends StatefulWidget {
+  URLState _urlState;
+  String _link;
+
+  PdfView(String link) {
+    _link = link;
+  }
+
   @override
-  URLState createState() => URLState();
+  URLState createState() {
+    _urlState =  URLState(_link);
+    return _urlState;
+  }
+
+  getState() => _urlState;
 
 }
 
 class URLState extends State<PdfView> {
 
+  String link;
   bool _isLoading = true;
   PDFDocument document;
-  
+
+  URLState(this.link);
+
   @override
   void initState() {
     super.initState();
-    loadDocument();
+    loadDocument(link);
   }
 
-  loadDocument() async {
-    document = await PDFDocument.fromURL("http://conorlastowka.com/book/CitationNeededBook-Sample.pdf");
+  loadDocument(String url) async {
+    document = await PDFDocument.fromURL(url);
     setState(() => _isLoading = false);
   }
 

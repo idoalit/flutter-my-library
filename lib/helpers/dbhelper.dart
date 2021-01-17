@@ -6,31 +6,8 @@ class DbHelper {
   static DbHelper _dbHelper;
   static Database _database;
 
-  DbHelper._createObject();
-
-  factory DbHelper() {
-    if (_dbHelper == null) {
-      _dbHelper = DbHelper._createObject();
-    }
-    return _dbHelper;
-  }
-
-  Future<Database> initDb() async {
-    var databasePath = await getDatabasesPath();
-    String path = join(databasePath, 'bibliography.db');
-
-    return openDatabase(path, version: 1, onCreate: _createDB);
-  }
-
-  Future<Database> get database async {
-    if (_database == null) {
-      _database = await initDb();
-    }
-    return _database;
-  }
-
-  void _createDB(Database database, int version) async {
-    await database.execute('''
+  static const initScript = [
+    '''
     CREATE TABLE "biblio" (
       "id"	INTEGER,
       "title"	TEXT NOT NULL,
@@ -51,7 +28,59 @@ class DbHelper {
       "updated_at"	TEXT,
       PRIMARY KEY("id" AUTOINCREMENT)
     );
-    ''');
+    ''',
+    '''
+    CREATE TABLE "server" (
+      "id" INTEGER,
+      "name" TEXT NOT NULL,
+      "url" TEXT NOT NULL,
+      "created_at" TEXT,
+      "updated_at" TEXT,
+      PRIMARY KEY("id" AUTOINCREMENT)
+    );
+    '''
+  ];
+  static const migrationScripts = [
+    '''
+      CREATE TABLE "server" (
+        "id" INTEGER,
+        "name" TEXT NOT NULL,
+        "url" TEXT NOT NULL,
+        "created_at" TEXT,
+        "updated_at" TEXT,
+        PRIMARY KEY("id" AUTOINCREMENT)
+      );
+    '''
+  ];
+
+  DbHelper._createObject();
+
+  factory DbHelper() {
+    if (_dbHelper == null) {
+      _dbHelper = DbHelper._createObject();
+    }
+    return _dbHelper;
+  }
+
+  Future<Database> initDb() async {
+    var databasePath = await getDatabasesPath();
+    String path = join(databasePath, 'bibliography.db');
+
+    return await openDatabase(path, version: migrationScripts.length + 1,
+        onCreate: (Database db, int version) async {
+      initScript.forEach((script) async => await db.execute(script));
+    }, onUpgrade: (Database db, int oldVersion, int newVersion) async {
+      for (var i = oldVersion - 1; i <= newVersion - 1; i++) {
+        if(migrationScripts.asMap().containsKey(i)) await db.execute(migrationScripts[i]);
+      }
+    });
+  }
+
+  Future<Database> get database async {
+    if (_database == null) {
+      _database = await initDb();
+    }
+    return _database;
   }
 
   // insert data

@@ -51,6 +51,7 @@ class EntryFormState extends State<EntryForm> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Add Bibliography'),
+        backgroundColor: Colors.lightGreen,
       ),
       body: Padding(
         padding: EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0),

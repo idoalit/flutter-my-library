@@ -11,8 +11,16 @@ import 'package:flutter_tags/flutter_tags.dart';
 import 'package:sqflite/sqflite.dart';
 
 class Home extends StatefulWidget {
+
+  _HomeState __homeState;
+
   @override
-  _HomeState createState() => _HomeState();
+  _HomeState createState() {
+    __homeState = _HomeState();
+    return __homeState;
+  }
+
+  getState() => __homeState;
 }
 
 class _HomeState extends State<Home> {
@@ -252,7 +260,7 @@ class _HomeState extends State<Home> {
                                           ],
                                         ),
                                         onPressed: () {
-                                          Navigator.push(context, MaterialPageRoute(builder: (context) => PdfView()));
+                                          Navigator.push(context, MaterialPageRoute(builder: (context) => PdfView(biblio.link)));
                                         },
                                       ),
                                       fallbackBuilder: (BuildContext context) => Text('')),
