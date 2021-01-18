@@ -32,6 +32,8 @@ dependencies:
   provider:
   flutter_downloader:
   permission_handler:
+  http:
+  xml2json:
 
 dev_dependencies:
   flutter_test:

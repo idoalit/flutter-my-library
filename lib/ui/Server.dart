@@ -1,5 +1,9 @@
+import 'dart:developer';
+
 import 'package:bibliography/helpers/dbhelper_server.dart';
 import 'package:bibliography/models/server.dart';
+import 'package:bibliography/ui/FormServer.dart';
+import 'package:bibliography/ui/SearchContainer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -29,14 +33,14 @@ class _ServerState extends State {
 
   @override
   Widget build(BuildContext context) {
-
     if (_serverList == null) {
       _serverList = List<ServerModel>();
       onUpdateListView();
     }
 
     return Scaffold(
-      body: _serverList.length < 1 ? _createEmptyView() : RefreshIndicator(child: _createListView(), onRefresh: onUpdateListView),
+      body: _serverList.length < 1 ? _createEmptyView() : RefreshIndicator(
+          child: _createListView(), onRefresh: onUpdateListView),
     );
   }
 
@@ -48,11 +52,31 @@ class _ServerState extends State {
         child: ListTile(
           leading: CircleAvatar(
             backgroundColor: Colors.lightBlue,
-            child: Text(_serverList[index].name[0]),
+            child: Text(_serverList[index].name [0]),
             foregroundColor: Colors.white,
           ),
           title: Text(_serverList[index].name),
-          subtitle: Text(_serverList[index].url),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(_serverList[index].url),
+              Chip(label: Text(_serverList[index].type))
+            ],
+          ),
+          trailing: IconButton(
+            icon: Icon(Icons.edit_rounded),
+            onPressed: () async {
+              await Navigator.push(context, MaterialPageRoute(builder: (context) {
+                return FormServer(_serverList[index]);
+              }));
+              refresh();
+            },
+          ),
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) {
+              return SearchContainer(_serverList[index]);
+            }));
+          },
         ),
       );
     }, itemCount: count,);
@@ -69,7 +93,8 @@ class _ServerState extends State {
             width: 120,
             height: 120,
           ),
-          Text('No Server Available')
+          Text('No Server Available'),
+          Text('Use add button to add new server')
         ],
       ),
     );

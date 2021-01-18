@@ -4,24 +4,39 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class FormServer extends StatefulWidget {
+  final ServerModel serverModel;
+  FormServer(this.serverModel);
+
   @override
-  _FormServerState createState() => _FormServerState();
+  _FormServerState createState() => _FormServerState(serverModel);
 }
 
 class _FormServerState extends State<FormServer> {
-
+  ServerModel serverModel;
   ServerHelper _serverHelper = ServerHelper();
   TextEditingController nameController = TextEditingController();
   TextEditingController urlController = TextEditingController();
+  String _typeController = 'slims';
+  var _type = ['slims', 'ucs', 'oai-pmh'];
+
+  _FormServerState(this.serverModel);
+  String titlePage = 'Add Server';
 
   @override
   Widget build(BuildContext context) {
+    if (serverModel != null) {
+      _typeController = serverModel.type;
+      nameController.text = serverModel.name;
+      urlController.text = serverModel.url;
 
-    ServerModel serverModel = ServerModel(null);
+      titlePage = 'Edit Server';
+    } else {
+      serverModel = ServerModel(null);
+    }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Server'),
+        title: Text(titlePage),
         backgroundColor: Colors.redAccent,
         centerTitle: true,
       ),
@@ -29,6 +44,23 @@ class _FormServerState extends State<FormServer> {
         padding: EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0),
         child: ListView(
           children: <Widget>[
+            Padding(
+              padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
+              child: DropdownButtonFormField<String>(
+                decoration: InputDecoration(border: OutlineInputBorder()),
+                items: _type
+                    .map((String e) => DropdownMenuItem<String>(
+                          child: Text(e),
+                          value: e,
+                        ))
+                    .toList(),
+                onChanged: (String newtype) {
+                  _typeController = newtype;
+                },
+                isDense: true,
+                value: _typeController,
+              ),
+            ),
             Padding(
               padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
               child: TextField(
@@ -63,7 +95,12 @@ class _FormServerState extends State<FormServer> {
         onPressed: () async {
           serverModel.name = nameController.text.trim();
           serverModel.url = urlController.text.trim();
-          var insert = await _serverHelper.insert(serverModel);
+          serverModel.type = _typeController;
+          if (serverModel.id != null) {
+            await _serverHelper.update(serverModel);
+          } else {
+            await _serverHelper.insert(serverModel);
+          }
           Navigator.pop(context, serverModel);
         },
         backgroundColor: Colors.redAccent,

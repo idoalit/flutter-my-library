@@ -2,6 +2,7 @@ class ServerModel {
   int _id;
   String _name;
   String _url;
+  String _type;
 
   ServerModel(this._id);
 
@@ -23,6 +24,12 @@ class ServerModel {
     _id = value;
   }
 
+  String get type => _type;
+
+  set type(String value) {
+    _type = value;
+  }
+
   ServerModel.fromMap(Map<String, dynamic> map) {
     if(map['id'] is String) {
       this._id = int.parse(map['id']);
@@ -31,6 +38,7 @@ class ServerModel {
     }
     this._name = map['name'];
     this._url = map['url'];
+    this._type = map['type'];
   }
 
   Map<String, dynamic> toMap() {
@@ -38,6 +46,7 @@ class ServerModel {
     map['id'] = this._id;
     map['name'] = this._name;
     map['url'] = this._url;
+    map['type'] = this._type;
     if (this._id == null) map['created_at'] = (DateTime.now()).toIso8601String();
     map['updated_at'] = (DateTime.now()).toIso8601String();
     return map;

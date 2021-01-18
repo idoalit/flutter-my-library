@@ -10,10 +10,11 @@ import 'package:bibliography/ui/Setting.dart';
 import 'package:bibliography/ui/entryform.dart';
 import 'package:bibliography/ui/home.dart';
 import 'package:bibliography/ui/Server.dart';
+import 'package:bibliography/view_model/server_view_model.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 
-import 'view_model/counter.dart';
 import 'view_model/router.dart';
 
 void main() {
@@ -31,7 +32,7 @@ void main() {
       // Read Provider's docs to learn about all the available providers.
       MultiProvider(
     providers: [
-      ChangeNotifierProvider(create: (context) => Counter()),
+      ChangeNotifierProvider(create: (context) => ServerViewModel()),
       ChangeNotifierProvider(create: (context) => PageRouter())
     ],
     child: MyApp(),
@@ -110,7 +111,7 @@ class MyHomePage extends StatelessWidget {
             MaterialPageRoute(builder: (context) {
               
               var router = Provider.of<PageRouter>(context);
-              if(router.currentPage == PageRouter.SERVER_PAGE) return FormServer();
+              if(router.currentPage == PageRouter.SERVER_PAGE) return FormServer(null);
               
               return EntryForm(null);
             }),

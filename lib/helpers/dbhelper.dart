@@ -34,6 +34,7 @@ class DbHelper {
       "id" INTEGER,
       "name" TEXT NOT NULL,
       "url" TEXT NOT NULL,
+      "type" TEXT NOT NULL,
       "created_at" TEXT,
       "updated_at" TEXT,
       PRIMARY KEY("id" AUTOINCREMENT)
@@ -46,6 +47,7 @@ class DbHelper {
         "id" INTEGER,
         "name" TEXT NOT NULL,
         "url" TEXT NOT NULL,
+        "type" TEXT NOT NULL,
         "created_at" TEXT,
         "updated_at" TEXT,
         PRIMARY KEY("id" AUTOINCREMENT)
