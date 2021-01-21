@@ -31,6 +31,7 @@ class _SearchState extends State<Search> {
   TextEditingController keyworldController = TextEditingController();
   List<Biblio> _biblioList;
   ServerModel _serverModel;
+  bool _isLoading = false;
 
   _SearchState();
 
@@ -92,14 +93,15 @@ class _SearchState extends State<Search> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
-                          new Image.asset(
+                          _isLoading ? const CircularProgressIndicator() :
+                          Image.asset(
                             "assets/not-found.png",
                             width: 80,
                             height: 80,
                           ),
                           Padding(
                             padding: EdgeInsets.only(top: 8.0),
-                            child: Text('Data not found!'),
+                            child: Text(_isLoading ? 'Loading...' : 'Data not found!'),
                           )
                         ],
                       ),
@@ -136,6 +138,10 @@ class _SearchState extends State<Search> {
 
   void _onSubmited(String keyword) async {
 
+    setState(() {
+      this._isLoading = true;
+    });
+
     if (_serverModel != null) {
       // search to server
       switch (_serverModel.type) {
@@ -158,6 +164,7 @@ class _SearchState extends State<Search> {
       List<Biblio> resultList = await dbHelper.getBiblioSearch(keyword);
       setState(() {
         this._biblioList = resultList;
+        this._isLoading = false;
       });
     }
   }
@@ -181,22 +188,24 @@ class _SearchState extends State<Search> {
       }
       setState(() {
         this._biblioList = resultList;
+        this._isLoading = false;
       });
       return json;
     }).catchError((error) {
-      Fluttertoast.showToast(
-          msg: error.toString(),
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.SNACKBAR,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0
-      );
+      // Fluttertoast.showToast(
+      //     msg: error.toString(),
+      //     toastLength: Toast.LENGTH_LONG,
+      //     gravity: ToastGravity.SNACKBAR,
+      //     timeInSecForIosWeb: 1,
+      //     backgroundColor: Colors.red,
+      //     textColor: Colors.white,
+      //     fontSize: 16.0
+      // );
       print(url);
       print(error);
       setState(() {
         this._biblioList = List<Biblio>();
+        this._isLoading = false;
       });
     });
   }
