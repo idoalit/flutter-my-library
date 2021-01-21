@@ -5,6 +5,7 @@ import 'package:bibliography/models/biblio.dart';
 import 'package:bibliography/models/server.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml2json/xml2json.dart';
 
@@ -85,58 +86,118 @@ class _SearchState extends State<Search> {
             ),
           ),
           Expanded(
-              child: ListView.builder(
-            itemBuilder: (BuildContext context, int index) {
-              return Card(
-                color: Colors.white,
-                child: ListTile(
-                  leading: CircleAvatar(
-                    child: Icon(Icons.book_outlined),
-                    backgroundColor: Colors.deepOrangeAccent,
-                    foregroundColor: Colors.white,
-                  ),
-                  title: Text(
-                    _biblioList[index].title,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  subtitle: Text(_biblioList[index].authors),
-                  onTap: () => {},
-                  isThreeLine: true,
-                ),
-              );
-            },
-            itemCount: _biblioList.length,
-          ))
+              child: _biblioList.length < 1
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          new Image.asset(
+                            "assets/not-found.png",
+                            width: 80,
+                            height: 80,
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(top: 8.0),
+                            child: Text('Data not found!'),
+                          )
+                        ],
+                      ),
+                    )
+                  : ListView.builder(
+                      itemBuilder: (BuildContext context, int index) {
+                        return Padding(
+                          padding: EdgeInsets.only(left: 12.0, right: 12.0),
+                          child: Card(
+                            color: Colors.white,
+                            child: ListTile(
+                              leading: CircleAvatar(
+                                child: Icon(Icons.book_outlined),
+                                backgroundColor: Colors.deepOrangeAccent,
+                                foregroundColor: Colors.white,
+                              ),
+                              title: Text(
+                                _biblioList[index].title,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              subtitle: Text(_biblioList[index].authors),
+                              onTap: () => {},
+                              isThreeLine: true,
+                            ),
+                          ),
+                        );
+                      },
+                      itemCount: _biblioList.length,
+                    ))
         ],
       ),
     );
   }
 
   void _onSubmited(String keyword) async {
-    DbHelper dbHelper = DbHelper();
-    // query
-    List<Biblio> resultList = await dbHelper.getBiblioSearch(keyword);
-    setState(() {
-      this._biblioList = resultList;
-    });
 
-    print(rssToJson());
+    if (_serverModel != null) {
+      // search to server
+      switch (_serverModel.type) {
+        case 'slims':
+          {
+            var url = "${_serverModel.url}?resultXML=true&keywords=$keyword&search=search";
+            xmlToJson(url);
+          }
+          break;
+        case 'ucs':
+          {
+            print(xmlToJson(keyword));
+          }
+          break;
+      }
+    } else {
+      // search local
+      DbHelper dbHelper = DbHelper();
+      // query
+      List<Biblio> resultList = await dbHelper.getBiblioSearch(keyword);
+      setState(() {
+        this._biblioList = resultList;
+      });
+    }
   }
 
-  Future<String> rssToJson() async {
+  Future<String> xmlToJson(String url) async {
     var client = new http.Client();
     final myTransformer = Xml2Json();
     return await client
-        .get("https://slims.web.id/demo/index.php?resultXML=true&keywords=&search=search")
+        .get(url)
         .then((response) {
       return response.body;
     }).then((bodyString) {
       myTransformer.parse(bodyString);
       var json = myTransformer.toGData();
+      List<Biblio> resultList = List<Biblio>();
+      Map<String, dynamic> result = jsonDecode(json);
 
-      print(json);
-
+      for (var i = 0; i < result['modsCollection']['mods'].length; i++) {
+        if (result['modsCollection']['mods'][i] != null)
+          resultList.add(Biblio.fromSLiMS(result['modsCollection']['mods'][i]));
+      }
+      setState(() {
+        this._biblioList = resultList;
+      });
       return json;
+    }).catchError((error) {
+      Fluttertoast.showToast(
+          msg: error.toString(),
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.SNACKBAR,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0
+      );
+      print(url);
+      print(error);
+      setState(() {
+        this._biblioList = List<Biblio>();
+      });
     });
   }
 }

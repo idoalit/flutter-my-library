@@ -34,6 +34,7 @@ dependencies:
   permission_handler:
   http:
   xml2json:
+  fluttertoast:
 
 dev_dependencies:
   flutter_test:

@@ -1,6 +1,3 @@
-import 'package:bibliography/models/creator.dart';
-import 'package:bibliography/models/subject.dart';
-
 class Biblio {
   int _id;
   String _title;
@@ -18,26 +15,6 @@ class Biblio {
 
   // constructor
   Biblio(this._id);
-
-  Biblio.fromMap(Map<String, dynamic> map) {
-    if (map['id'] is String) {
-      this._id = int.parse(map['id']);
-    } else {
-      this._id = map['id'];
-    }
-    this._title = map['title'];
-    this._publisher = map['publisher'];
-    this._publishYear = map['publish_year'];
-    this._isbn = map['isbn'];
-    this._synopsis = map['description'];
-    this._authors = map['creators'];
-    this._subject = map['subjects'];
-    this._edition = map['edition'];
-    this._type = map['type'];
-    this._notes = map['notes'];
-    this._source = map['source'];
-    this._link = map['link'];
-  }
 
   // getter & setter
   String get subject => _subject;
@@ -138,5 +115,42 @@ class Biblio {
       map['created_at'] = (new DateTime.now()).toIso8601String();
     map['updated_at'] = (new DateTime.now()).toIso8601String();
     return map;
+  }
+
+  Biblio.fromMap(Map<String, dynamic> map) {
+    if (map['id'] is String) {
+      this._id = int.parse(map['id']);
+    } else {
+      this._id = map['id'];
+    }
+    this._title = map['title'];
+    this._publisher = map['publisher'];
+    this._publishYear = map['publish_year'];
+    this._isbn = map['isbn'];
+    this._synopsis = map['description'];
+    this._authors = map['creators'];
+    this._subject = map['subjects'];
+    this._edition = map['edition'];
+    this._type = map['type'];
+    this._notes = map['notes'];
+    this._source = map['source'];
+    this._link = map['link'];
+  }
+
+  Biblio.fromSLiMS(Map<String, dynamic> map) {
+    this._id = int.parse(map['ID']);
+    var subtitle = (map['titleInfo']['subTitle'] != null) ? (map['titleInfo']['subTitle']['\$t'] ?? map['titleInfo']['subTitle']['__cdata']) : '';
+    this._title = (map['titleInfo']['title']['\$t'] ?? map['titleInfo']['title']['__cdata']) + ' ' + subtitle;
+    this._publisher = map['originInfo']['place']['publisher']['\$t'] ?? map['originInfo']['place']['publisher']['__cdata'];
+    this._publishYear = map['originInfo']['place']['dateIssued']['\$t'] ?? map['originInfo']['place']['dateIssued']['__cdata'];
+    this._isbn = map['identifier']['\$t'] ?? map['identifier']['__cdata'];
+
+    var authors = [];
+    for(var i = 0; i < map['name'].length; i++) {
+      if(map['name'][i] != null) authors.add(map['name'][i]['namePart']['\$t'] ?? map['name'][i]['namePart']['__cdata']);
+    }
+    this._authors = authors.join(' - ');
+
+    this._type = map['typeOfResource']['\$t'] ?? map['typeOfResource']['__cdata'];
   }
 }
