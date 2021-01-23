@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:bibliography/helpers/dbhelper.dart';
 import 'package:bibliography/models/biblio.dart';
 import 'package:bibliography/models/server.dart';
+import 'package:bibliography/ui/SLiMSDetail.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -123,7 +124,9 @@ class _SearchState extends State<Search> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                               subtitle: Text(_biblioList[index].authors),
-                              onTap: () => {},
+                              onTap: () {
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => SLiMSDetail()));
+                              },
                               isThreeLine: true,
                             ),
                           ),
@@ -192,15 +195,6 @@ class _SearchState extends State<Search> {
       });
       return json;
     }).catchError((error) {
-      // Fluttertoast.showToast(
-      //     msg: error.toString(),
-      //     toastLength: Toast.LENGTH_LONG,
-      //     gravity: ToastGravity.SNACKBAR,
-      //     timeInSecForIosWeb: 1,
-      //     backgroundColor: Colors.red,
-      //     textColor: Colors.white,
-      //     fontSize: 16.0
-      // );
       print(url);
       print(error);
       setState(() {

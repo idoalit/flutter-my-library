@@ -10,10 +10,10 @@ import 'package:permission_handler/permission_handler.dart';
 
 const debug = true;
 
-class Server extends StatefulWidget with WidgetsBindingObserver {
+class SLiMSAttachment extends StatefulWidget with WidgetsBindingObserver {
   final TargetPlatform platform;
 
-  Server({Key key, this.title, this.platform}) : super(key: key);
+  SLiMSAttachment({Key key, this.title, this.platform}) : super(key: key);
 
   final String title;
 
@@ -21,7 +21,7 @@ class Server extends StatefulWidget with WidgetsBindingObserver {
   _ServerState createState() => _ServerState();
 }
 
-class _ServerState extends State<Server> {
+class _ServerState extends State<SLiMSAttachment> {
   final _documents = [
     {
       'name': 'Sample PDF for testing',
@@ -173,7 +173,8 @@ class _ServerState extends State<Server> {
 
   Widget _buildDownloadList() => Container(
         child: ListView(
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
           children: _items
               .map((item) => item.task == null
                   ? _buildListSection(item.name)

@@ -12,16 +12,16 @@ import 'package:bibliography/ui/home.dart';
 import 'package:bibliography/ui/Server.dart';
 import 'package:bibliography/view_model/server_view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:path/path.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:provider/provider.dart';
 
 import 'view_model/router.dart';
 
-void main() {
+Future<void> main() async {
 
   // initialize file download
-  // WidgetsFlutterBinding.ensureInitialized();
-  // await FlutterDownloader.initialize(debug: true);
+  WidgetsFlutterBinding.ensureInitialized();
+  await FlutterDownloader.initialize(debug: true);
 
   runApp(
       // Provide the model to all widgets within the app. We're using
