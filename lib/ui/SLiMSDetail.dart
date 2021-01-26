@@ -1,18 +1,48 @@
+import 'dart:convert';
+import 'dart:developer';
+
+import 'package:bibliography/models/biblio.dart';
+import 'package:bibliography/models/server.dart';
 import 'package:bibliography/ui/DescriptionTextWidget.dart';
-import 'package:bibliography/ui/SLiMSAttachment.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:xml2json/xml2json.dart';
 
+// ignore: must_be_immutable
 class SLiMSDetail extends StatefulWidget {
   final String imgTag = 'image_tag';
   final String titleTag = 'title_tag';
   final String authorTag = 'author_tag';
 
+  Biblio biblio;
+  ServerModel serverModel;
+
+  SLiMSDetail(this.biblio, this.serverModel);
+
   @override
-  _SLiMSDetailState createState() => _SLiMSDetailState();
+  _SLiMSDetailState createState() {
+    String url = '${serverModel.url}/?p=show_detail&id=${biblio.id}&inXML=true';
+    return _SLiMSDetailState(url, serverModel);
+  }
 }
 
 class _SLiMSDetailState extends State<SLiMSDetail> {
+  Map<String, dynamic> detail;
+  String detailURL;
+  Biblio biblio;
+  ServerModel serverModel;
+  String notes = '-';
+  DescriptionTextWidget _descriptionTextWidget;
+
+  _SLiMSDetailState(this.detailURL, this.serverModel);
+
+  @override
+  void initState() {
+    super.initState();
+    _getDetail(detailURL);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,17 +63,21 @@ class _SLiMSDetailState extends State<SLiMSDetail> {
           ),
           Padding(
             padding: EdgeInsets.all(8.0),
-            child: DescriptionTextWidget(
-                text:
-                    'An in-depth examination of the core concepts and general principles of Web application development. This book uses examples from specific technologies (e.g., servlet API or XSL), without promoting or endorsing particular platforms or APIs. Such knowledge is critical when designing and debugging complex systems. This conceptual understanding makes it easier to learn new APIs that arise in the rapidly changing Internet environment'),
+            child: _descriptionTextWidget),
+          SizedBox(
+            height: 10.0,
           ),
-          SizedBox(height: 10.0,),
           SizedBox(height: 30.0),
           _buildSectionTitle('Attachment'),
           _buildDivider(),
           SizedBox(height: 10.0),
           _buildAttachment()
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        label: Text('Add to collection'),
+        icon: Icon(Icons.post_add_rounded),
+        onPressed: () => {},
       ),
     );
   }
@@ -61,14 +95,12 @@ class _SLiMSDetailState extends State<SLiMSDetail> {
               child: Padding(
                 padding: EdgeInsets.only(right: 16.0),
                 child: CachedNetworkImage(
-                  imageUrl: "https://picsum.photos/200/300?v=3",
+                  imageUrl: _getImageUrl(),
                   imageBuilder: (context, imageProvider) => Container(
                     decoration: BoxDecoration(
                       image: DecorationImage(
                           image: imageProvider,
-                          fit: BoxFit.cover,
-                          colorFilter: ColorFilter.mode(
-                              Colors.red, BlendMode.colorBurn)),
+                          fit: BoxFit.cover,),
                     ),
                   ),
                   placeholder: (context, url) => LinearProgressIndicator(),
@@ -94,7 +126,7 @@ class _SLiMSDetailState extends State<SLiMSDetail> {
                 child: Material(
                   type: MaterialType.transparency,
                   child: Text(
-                    'Judul pbuku yang sangat panjang',
+                    _getTitle(),
                     style: TextStyle(
                       fontSize: 20.0,
                       fontWeight: FontWeight.bold,
@@ -111,7 +143,7 @@ class _SLiMSDetailState extends State<SLiMSDetail> {
                   child: Material(
                     type: MaterialType.transparency,
                     child: Text(
-                      'waris agung widodo',
+                      _getAuthors(),
                       style: TextStyle(
                           fontSize: 16.0,
                           fontWeight: FontWeight.w800,
@@ -144,24 +176,95 @@ class _SLiMSDetailState extends State<SLiMSDetail> {
       );
 
   _buildAttachment() {
-    return Padding(padding: EdgeInsets.all(8.0), child: ListView(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      children: <Widget>[
-        ListTile(title: Text('document_1.pdf'), trailing: Icon(Icons.download_rounded),),
-        Divider(),
-        ListTile(title: Text('document_2.pdf'), trailing: Icon(Icons.download_rounded)),
-        Divider(),
-        ListTile(title: Text('document_3.pdf'), trailing: Icon(Icons.download_rounded)),
-        Divider(),
-        ListTile(title: Text('document_4.pdf'), trailing: Icon(Icons.download_rounded)),
-        Divider(),
-        ListTile(title: Text('document_5.pdf'), trailing: Icon(Icons.download_rounded)),
-        Divider(),
-        ListTile(title: Text('document_6.pdf'), trailing: Icon(Icons.download_rounded)),
-        Divider(),
-        ListTile(title: Text('document_7.pdf'), trailing: Icon(Icons.download_rounded)),
-      ],
-    ),);
+
+    List<dynamic> digital = _getDigital();
+
+    return Padding(
+      padding: EdgeInsets.all(8.0),
+      child: ListView.separated(
+        physics: NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        itemBuilder: (BuildContext context, int index) {
+          return ListTile(
+            title: Text(digital[index]['\$t']),
+            subtitle: Text(digital[index]['path']),
+            trailing: Icon(Icons.more_vert_rounded),
+          );
+        },
+        itemCount: digital.length,
+        separatorBuilder: (BuildContext context, int index) => Divider(
+          color: Colors.grey,
+        ),
+      ),
+    );
+  }
+
+  void _getDetail(String url) async {
+    var client = http.Client();
+    var transformer = Xml2Json();
+
+    await client.get(url).then((res) => res.body).then((res) {
+      transformer.parse(res);
+      var json = transformer.toGData();
+      Map<String, dynamic> result = jsonDecode(json);
+
+      String notes = '-';
+      if(result['modsCollection']['note'] != null) {
+        if(result['modsCollection']['note'].length > 0) {
+          if(result['modsCollection']['note'][0]['\$t'] != null) notes = result['modsCollection']['note'][0]['\$t'];
+        }
+      }
+
+      setState(() {
+        this.detail = result;
+        this._descriptionTextWidget = DescriptionTextWidget(text: notes);
+      });
+    });
+  }
+
+  String _getTitle() {
+    if (detail == null) return '';
+    return _itOr(detail['modsCollection']['mods']['titleInfo']['title'], '') +
+        ' ' +
+        _itOr(detail['modsCollection']['mods']['titleInfo']['subTitle'], '');
+  }
+
+  String _getAuthors() {
+    if (detail == null) return '';
+    var map = detail['modsCollection']['mods'];
+    var authors = [];
+    for (var i = 0; i < map['name'].length; i++) {
+      if (map['name'][i] != null)
+        authors.add(map['name'][i]['namePart']['\$t'] ??
+            map['name'][i]['namePart']['__cdata']);
+    }
+    return authors.join(' - ');
+  }
+
+  _getImageUrl() {
+    var image = serverModel.url + '/images/default/image.png';
+    if (detail != null && detail['modsCollection']['slims\$image'] != null)
+      image = serverModel.url +
+        '/images/docs/' +
+        detail['modsCollection']['slims\$image']['\$t'];
+
+    return image;
+  }
+
+  List _getDigital() {
+    List<dynamic> list = List<dynamic>();
+    if(detail == null || detail['modsCollection']['slims\$digitals'] == null) return list;
+    var digital = detail['modsCollection']['slims\$digitals']['slims\$digital_item'];
+    if(digital is List<dynamic>) {
+      list = digital;
+    } else {
+      if(digital != null ) list.add(digital);
+    }
+    return list;
+  }
+
+  String _itOr(Map map, String _default) {
+    if (map == null) return _default;
+    return map['\$t'];
   }
 }

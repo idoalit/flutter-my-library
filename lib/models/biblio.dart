@@ -12,6 +12,7 @@ class Biblio {
   String _notes;
   String _source;
   String _link;
+  String _image;
 
   // constructor
   Biblio(this._id);
@@ -95,6 +96,12 @@ class Biblio {
     _link = value;
   }
 
+  String get image => _image;
+
+  set image(String value) {
+    _image = value;
+  }
+
   // map conversion
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = Map<String, dynamic>();
@@ -152,5 +159,6 @@ class Biblio {
     this._authors = authors.join(' - ');
 
     this._type = map['typeOfResource']['\$t'] ?? map['typeOfResource']['__cdata'];
+    this._image = map['slims\$image']['\$t'] ?? map['image']['__cdata'];
   }
 }

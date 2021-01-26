@@ -4,6 +4,7 @@ import 'package:bibliography/helpers/dbhelper.dart';
 import 'package:bibliography/models/biblio.dart';
 import 'package:bibliography/models/server.dart';
 import 'package:bibliography/ui/SLiMSDetail.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -114,18 +115,18 @@ class _SearchState extends State<Search> {
                           child: Card(
                             color: Colors.white,
                             child: ListTile(
-                              leading: CircleAvatar(
-                                child: Icon(Icons.book_outlined),
+                              leading: _serverModel.type == 'slims' ? CircleAvatar(
+                                backgroundImage: NetworkImage(_getImageUrl(_biblioList[index].image)),
                                 backgroundColor: Colors.deepOrangeAccent,
                                 foregroundColor: Colors.white,
-                              ),
+                              ) : null,
                               title: Text(
                                 _biblioList[index].title,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               subtitle: Text(_biblioList[index].authors),
                               onTap: () {
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => SLiMSDetail()));
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => SLiMSDetail(_biblioList[index],_serverModel)));
                               },
                               isThreeLine: true,
                             ),
@@ -202,5 +203,12 @@ class _SearchState extends State<Search> {
         this._isLoading = false;
       });
     });
+  }
+
+  _getImageUrl(String image) {
+    if (image == null) return _serverModel.url + '/images/default/image.png';
+    return _serverModel.url +
+        '/images/docs/' + image;
+
   }
 }
