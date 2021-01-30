@@ -66,6 +66,7 @@ flutter:
     - assets/check-mark.png
     - assets/404.png
     - assets/sample.json
+    - assets/server.json
     - assets/coming-soon.png
 
   # An image asset can refer to one or more resolution-specific "variants", see

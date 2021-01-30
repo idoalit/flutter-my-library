@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:bibliography/helpers/dbhelper_server.dart';
@@ -6,6 +7,7 @@ import 'package:bibliography/ui/FormServer.dart';
 import 'package:bibliography/ui/SearchContainer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 // ignore: must_be_immutable
 class Server extends StatefulWidget {
@@ -107,6 +109,23 @@ class _ServerState extends State {
         this._serverList = list;
         this.count = _serverList.length;
       });
+
+      // TODO: remove code below if you don't want to add sample server data
+      if(list.length < 1) {
+        addSampleServer();
+      }
     });
+  }
+
+  void addSampleServer() async {
+    // get json string from file
+    String serverJson = await rootBundle.loadString("assets/server.json");
+    List<dynamic> serverList = jsonDecode(serverJson);
+    for(Map<String,dynamic> server in serverList) {
+      ServerModel serverModel = ServerModel.fromMap(server);
+      serverModel.id = null;
+      ServerHelper serverHelper = ServerHelper();
+      await serverHelper.insert(serverModel);
+    }
   }
 }

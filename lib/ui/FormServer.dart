@@ -17,7 +17,7 @@ class _FormServerState extends State<FormServer> {
   TextEditingController nameController = TextEditingController();
   TextEditingController urlController = TextEditingController();
   String _typeController = 'slims';
-  var _type = ['slims', 'ucs', 'oai-pmh'];
+  var _type = ['slims'];
 
   _FormServerState(this.serverModel);
   String titlePage = 'Add Server';

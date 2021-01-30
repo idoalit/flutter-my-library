@@ -118,6 +118,7 @@ class Biblio {
     map['source'] = source;
     map['notes'] = notes;
     map['link'] = link;
+    map['image'] = image;
     if (this._id == null)
       map['created_at'] = (new DateTime.now()).toIso8601String();
     map['updated_at'] = (new DateTime.now()).toIso8601String();
@@ -142,14 +143,24 @@ class Biblio {
     this._notes = map['notes'];
     this._source = map['source'];
     this._link = map['link'];
+    this._image = map['image'];
   }
 
   Biblio.fromSLiMS(Map<String, dynamic> map) {
-    this._id = int.parse(map['ID']);
+    this._id = map['ID'] != null ? int.parse(map['ID']) : null;
     var subtitle = (map['titleInfo']['subTitle'] != null) ? (map['titleInfo']['subTitle']['\$t'] ?? map['titleInfo']['subTitle']['__cdata']) : '';
     this._title = (map['titleInfo']['title']['\$t'] ?? map['titleInfo']['title']['__cdata']) + ' ' + subtitle;
-    this._publisher = map['originInfo']['place']['publisher']['\$t'] ?? map['originInfo']['place']['publisher']['__cdata'];
-    this._publishYear = map['originInfo']['place']['dateIssued']['\$t'] ?? map['originInfo']['place']['dateIssued']['__cdata'];
+
+    if (map['originInfo']['place']['publisher'] != null) {
+      // result search
+      this._publisher = map['originInfo']['place']['publisher']['\$t'] ?? map['originInfo']['place']['publisher']['__cdata'];
+      this._publishYear = map['originInfo']['place']['dateIssued']['\$t'] ?? map['originInfo']['place']['dateIssued']['__cdata'];
+    } else {
+      // result detail
+      this._publisher = map['originInfo']['publisher']['\$t'] ?? map['originInfo']['publisher']['__cdata'];
+      this._publishYear = map['originInfo']['dateIssued']['\$t'] ?? map['originInfo']['dateIssued']['__cdata'];
+    }
+
     this._isbn = map['identifier']['\$t'] ?? map['identifier']['__cdata'];
 
     var authors = [];
@@ -158,7 +169,26 @@ class Biblio {
     }
     this._authors = authors.join(' - ');
 
-    this._type = map['typeOfResource']['\$t'] ?? map['typeOfResource']['__cdata'];
+    if (map['subject'] != null ) {
+      var subjects = [];
+      for(var i = 0; i < map['subject'].length; i++) {
+        if(map['subject'][i] != null) subjects.add(map['subject'][i]['topic']['\$t'] ?? map['subject'][i]['topic']['__cdata']);
+      }
+      this._subject = subjects.join(' - ');
+    }
+
+    if (map['note'] != null) {
+      if (map['note'].length > 0) {
+        if (map['note'][0] != null) {
+          this._synopsis = map['note'][0]['\$t'];
+        } else {
+          this._synopsis = map['note']['\$t'];
+        }
+      }
+    }
+
+    // default type as book
+    this._type = 'Book';
     this._image = map['slims\$image']['\$t'] ?? map['image']['__cdata'];
   }
 }

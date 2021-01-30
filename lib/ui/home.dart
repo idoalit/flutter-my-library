@@ -10,6 +10,7 @@ import 'package:flutter_conditional_rendering/conditional.dart';
 import 'package:flutter_tags/flutter_tags.dart';
 import 'package:sqflite/sqflite.dart';
 
+// ignore: must_be_immutable
 class Home extends StatefulWidget {
 
   _HomeState __homeState;
@@ -76,14 +77,16 @@ class _HomeState extends State<Home> {
 
     return ListView.builder(
       itemBuilder: (BuildContext context, int index) {
+
         return Card(
           color: Colors.white,
           elevation: 2.0,
           child: ListTile(
             leading: CircleAvatar(
               backgroundColor: Colors.lightBlue,
-              child: Text(this.biblioList[index].title[0]),
+              child: this.biblioList[index].image != null ? null : Text(this.biblioList[index].title[0]),
               foregroundColor: Colors.white,
+              backgroundImage: this.biblioList[index].image != null ? NetworkImage(this.biblioList[index].image) : null,
             ),
             title: Text(
               this.biblioList[index].title,
@@ -103,10 +106,10 @@ class _HomeState extends State<Home> {
                   context: context,
                   builder: (BuildContext buildContex) {
                     Biblio biblio = this.biblioList[index];
-                    List<String> subjects = biblio.subject
-                        .split(',')
+                    List<String> subjects = biblio.subject != null ?
+                        biblio.subject.split(',')
                         .map((String s) => s.trim())
-                        .toList();
+                        .toList() : List<String>();
 
                     return FractionallySizedBox(
                       heightFactor: 0.8,
@@ -138,7 +141,7 @@ class _HomeState extends State<Home> {
                                     ),
                                   ),
                                   Text(
-                                    biblio.synopsis,
+                                    biblio.synopsis ?? '-',
                                     style:
                                         TextStyle(fontWeight: FontWeight.w300),
                                   ),
@@ -337,7 +340,7 @@ class _HomeState extends State<Home> {
 
           if (biblioList.length < 1) {
             // Todo: REMOVE THIS CODE IN PRODUCTION
-            createSampleData();
+            // createSampleData();
           }
         });
       });

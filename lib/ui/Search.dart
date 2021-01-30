@@ -4,6 +4,7 @@ import 'package:bibliography/helpers/dbhelper.dart';
 import 'package:bibliography/models/biblio.dart';
 import 'package:bibliography/models/server.dart';
 import 'package:bibliography/ui/SLiMSDetail.dart';
+import 'package:bibliography/ui/SLiMSDetailLocal.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -75,7 +76,7 @@ class _SearchState extends State<Search> {
                     decoration: InputDecoration(
                       hintText: _serverModel != null
                           ? 'Search in ${_serverModel.name}'
-                          : 'Search',
+                          : 'Search in My Library',
                       hintStyle: TextStyle(
                         color: Colors.deepOrange.withOpacity(0.5),
                       ),
@@ -115,18 +116,24 @@ class _SearchState extends State<Search> {
                           child: Card(
                             color: Colors.white,
                             child: ListTile(
-                              leading: _serverModel.type == 'slims' ? CircleAvatar(
-                                backgroundImage: NetworkImage(_getImageUrl(_biblioList[index].image)),
+                              leading: CircleAvatar(
+                                backgroundImage: _biblioList[index].image != null ? NetworkImage(_getImageUrl(_biblioList[index].image)) : null,
                                 backgroundColor: Colors.deepOrangeAccent,
                                 foregroundColor: Colors.white,
-                              ) : null,
+                                child: _biblioList[index].image != null ? null : Text(_biblioList[index].title[0]),
+                              ),
                               title: Text(
                                 _biblioList[index].title,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               subtitle: Text(_biblioList[index].authors),
                               onTap: () {
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => SLiMSDetail(_biblioList[index],_serverModel)));
+                                if (_serverModel != null) {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => SLiMSDetail(_biblioList[index],_serverModel)));
+                                } else {
+                                  // detail for local content
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => SLiMSDetailLocal(_biblioList[index])));
+                                }
                               },
                               isThreeLine: true,
                             ),
@@ -206,9 +213,12 @@ class _SearchState extends State<Search> {
   }
 
   _getImageUrl(String image) {
-    if (image == null) return _serverModel.url + '/images/default/image.png';
-    return _serverModel.url +
-        '/images/docs/' + image;
-
+    if (_serverModel == null) {
+      return image;
+    } else {
+      if (image == null) return _serverModel.url + '/images/default/image.png';
+      return _serverModel.url +
+          '/images/docs/' + image;
+    }
   }
 }

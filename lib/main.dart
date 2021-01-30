@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:bibliography/helpers/dbhelper.dart';
 import 'package:bibliography/models/biblio.dart';
 import 'package:bibliography/models/server.dart';
 import 'package:bibliography/ui/FormServer.dart';
@@ -118,7 +119,16 @@ class MyHomePage extends StatelessWidget {
           );
 
           if (result is ServerModel) pageServer.getState().refresh();
-          if (result is Biblio && result.title != '') pageHome.getState().saveBiblio(result);
+          if (result is Biblio && result.title != '') {
+            if (pageHome.getState() != null) {
+              pageHome.getState().saveBiblio(result);
+            } else {
+              await DbHelper().insert(result);
+              // back to home
+              _pageController.jumpToPage(PageRouter.HOME_PAGE);
+              context.read<PageRouter>().goto(PageRouter.HOME_PAGE);
+            }
+          }
 
         },
         tooltip: 'Increment',

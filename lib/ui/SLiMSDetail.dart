@@ -1,11 +1,13 @@
 import 'dart:convert';
-import 'dart:developer';
 
+import 'package:bibliography/helpers/dbhelper.dart';
 import 'package:bibliography/models/biblio.dart';
 import 'package:bibliography/models/server.dart';
 import 'package:bibliography/ui/DescriptionTextWidget.dart';
+import 'package:bibliography/ui/pdfview.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml2json/xml2json.dart';
 
@@ -61,9 +63,7 @@ class _SLiMSDetailState extends State<SLiMSDetail> {
           SizedBox(
             height: 10.0,
           ),
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: _descriptionTextWidget),
+          Padding(padding: EdgeInsets.all(8.0), child: _descriptionTextWidget),
           SizedBox(
             height: 10.0,
           ),
@@ -77,7 +77,45 @@ class _SLiMSDetailState extends State<SLiMSDetail> {
       floatingActionButton: FloatingActionButton.extended(
         label: Text('Add to collection'),
         icon: Icon(Icons.post_add_rounded),
-        onPressed: () => {},
+        onPressed: () async {
+          // convert result detail to Biblio object
+          biblio = Biblio.fromSLiMS(detail['modsCollection']['mods']);
+          biblio.id = null;
+          biblio.image = _getImageUrl();
+
+          // add first pdf to link
+          List<dynamic> digitals = _getDigital() ?? _getDigitalOld();
+          var n = 0;
+          for (var digital in digitals) {
+            if(n < 1 && digital['mimetype'] == 'application/pdf') {
+              biblio.link = serverModel.url + "/index.php?p=fstream-pdf&fid=${digital['id']}&bid=${detail['modsCollection']['mods']['id']}";
+              n++;
+            }
+          }
+
+          var insert = await DbHelper().insert(biblio);
+          if (insert != null) {
+            Fluttertoast.showToast(
+                msg: "Data added to collection",
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.SNACKBAR,
+                timeInSecForIosWeb: 1,
+                backgroundColor: Colors.green,
+                textColor: Colors.white,
+                fontSize: 16.0
+            );
+          } else {
+            Fluttertoast.showToast(
+                msg: "FAILED adding data",
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.SNACKBAR,
+                timeInSecForIosWeb: 1,
+                backgroundColor: Colors.red,
+                textColor: Colors.white,
+                fontSize: 16.0
+            );
+          }
+        },
       ),
     );
   }
@@ -99,8 +137,9 @@ class _SLiMSDetailState extends State<SLiMSDetail> {
                   imageBuilder: (context, imageProvider) => Container(
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                          image: imageProvider,
-                          fit: BoxFit.cover,),
+                        image: imageProvider,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                   placeholder: (context, url) => LinearProgressIndicator(),
@@ -176,8 +215,7 @@ class _SLiMSDetailState extends State<SLiMSDetail> {
       );
 
   _buildAttachment() {
-
-    List<dynamic> digital = _getDigital();
+    List<dynamic> digital = _getDigital() ?? _getDigitalOld();
 
     return Padding(
       padding: EdgeInsets.all(8.0),
@@ -187,8 +225,19 @@ class _SLiMSDetailState extends State<SLiMSDetail> {
         itemBuilder: (BuildContext context, int index) {
           return ListTile(
             title: Text(digital[index]['\$t']),
-            subtitle: Text(digital[index]['path']),
-            trailing: Icon(Icons.more_vert_rounded),
+            subtitle: Text(digital[index]['mimetype']),
+            trailing: digital[index]['mimetype'] == 'application/pdf' ? IconButton(
+              icon: Icon(Icons.download_rounded),
+              onPressed: () => {
+                // code
+              },
+            ) : null,
+            onTap: () {
+              if(digital[index]['mimetype'] == 'application/pdf') {
+                var pdfLink = serverModel.url + "/index.php?p=fstream-pdf&fid=${digital[index]['id']}&bid=${detail['modsCollection']['mods']['id']}";
+                Navigator.push(context, MaterialPageRoute(builder: (context) => PdfView(pdfLink)));
+              }
+            },
           );
         },
         itemCount: digital.length,
@@ -209,9 +258,21 @@ class _SLiMSDetailState extends State<SLiMSDetail> {
       Map<String, dynamic> result = jsonDecode(json);
 
       String notes = '-';
-      if(result['modsCollection']['note'] != null) {
-        if(result['modsCollection']['note'].length > 0) {
-          if(result['modsCollection']['note'][0]['\$t'] != null) notes = result['modsCollection']['note'][0]['\$t'];
+      if (result['modsCollection']['note'] != null) {
+        if (result['modsCollection']['note'].length > 0) {
+          if (result['modsCollection']['note'][0] != null) {
+            notes = result['modsCollection']['note'][0]['\$t'];
+          } else if (result['modsCollection']['note']['\$t'] != null) {
+            notes = result['modsCollection']['note']['\$t'];
+          }
+        }
+      } else if (result['modsCollection']['mods']['note'] != null) {
+        if (result['modsCollection']['mods']['note'].length > 0) {
+          if (result['modsCollection']['mods']['note'][0] != null) {
+            notes = result['modsCollection']['mods']['note'][0]['\$t'];
+          } else if (result['modsCollection']['mods']['note']['\$t'] != null) {
+            notes = result['modsCollection']['mods']['note']['\$t'];
+          }
         }
       }
 
@@ -243,22 +304,45 @@ class _SLiMSDetailState extends State<SLiMSDetail> {
 
   _getImageUrl() {
     var image = serverModel.url + '/images/default/image.png';
-    if (detail != null && detail['modsCollection']['slims\$image'] != null)
+    if (detail != null && detail['modsCollection']['slims\$image'] != null) {
       image = serverModel.url +
-        '/images/docs/' +
-        detail['modsCollection']['slims\$image']['\$t'];
+          '/images/docs/' +
+          detail['modsCollection']['slims\$image']['\$t'];
+    } else if (detail != null &&
+        detail['modsCollection']['mods']['slims\$image'] != null) {
+      image = serverModel.url +
+          '/images/docs/' +
+          detail['modsCollection']['mods']['slims\$image']['\$t'];
+    }
 
     return image;
   }
 
   List _getDigital() {
     List<dynamic> list = List<dynamic>();
-    if(detail == null || detail['modsCollection']['slims\$digitals'] == null) return list;
-    var digital = detail['modsCollection']['slims\$digitals']['slims\$digital_item'];
-    if(digital is List<dynamic>) {
+    if (detail == null ||
+        detail['modsCollection']['mods']['slims\$digitals'] == null)
+      return list;
+    var digital = detail['modsCollection']['mods']['slims\$digitals']
+        ['slims\$digital_item'];
+    if (digital is List<dynamic>) {
       list = digital;
     } else {
-      if(digital != null ) list.add(digital);
+      if (digital != null) list.add(digital);
+    }
+    return list;
+  }
+
+  List _getDigitalOld() {
+    List<dynamic> list = List<dynamic>();
+    if (detail == null || detail['modsCollection']['slims\$digitals'] == null)
+      return list;
+    var digital =
+        detail['modsCollection']['slims\$digitals']['slims\$digital_item'];
+    if (digital is List<dynamic>) {
+      list = digital;
+    } else {
+      if (digital != null) list.add(digital);
     }
     return list;
   }
