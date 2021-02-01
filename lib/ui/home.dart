@@ -263,7 +263,10 @@ class _HomeState extends State<Home> {
                                           ],
                                         ),
                                         onPressed: () {
-                                          Navigator.push(context, MaterialPageRoute(builder: (context) => PdfView(biblio.link)));
+                                          Navigator.push(context, MaterialPageRoute(builder: (context) {
+                                            if (biblio.path != null) return PdfView.fromPath(biblio.path);
+                                            return PdfView(biblio.link);
+                                          }));
                                         },
                                       ),
                                       fallbackBuilder: (BuildContext context) => Text('')),

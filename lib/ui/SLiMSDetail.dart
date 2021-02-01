@@ -226,12 +226,12 @@ class _SLiMSDetailState extends State<SLiMSDetail> {
           return ListTile(
             title: Text(digital[index]['\$t']),
             subtitle: Text(digital[index]['mimetype']),
-            trailing: digital[index]['mimetype'] == 'application/pdf' ? IconButton(
-              icon: Icon(Icons.download_rounded),
-              onPressed: () => {
-                // code
-              },
-            ) : null,
+            // trailing: digital[index]['mimetype'] == 'application/pdf' ? IconButton(
+            //   icon: Icon(Icons.download_rounded),
+            //   onPressed: () => {
+            //     // code
+            //   },
+            // ) : null,
             onTap: () {
               if(digital[index]['mimetype'] == 'application/pdf') {
                 var pdfLink = serverModel.url + "/index.php?p=fstream-pdf&fid=${digital[index]['id']}&bid=${detail['modsCollection']['mods']['id']}";
@@ -258,6 +258,7 @@ class _SLiMSDetailState extends State<SLiMSDetail> {
       Map<String, dynamic> result = jsonDecode(json);
 
       String notes = '-';
+
       if (result['modsCollection']['note'] != null) {
         if (result['modsCollection']['note'].length > 0) {
           if (result['modsCollection']['note'][0] != null) {
@@ -267,9 +268,12 @@ class _SLiMSDetailState extends State<SLiMSDetail> {
           }
         }
       } else if (result['modsCollection']['mods']['note'] != null) {
+
+        print(result['modsCollection']['mods']['note']);
+
         if (result['modsCollection']['mods']['note'].length > 0) {
           if (result['modsCollection']['mods']['note'][0] != null) {
-            notes = result['modsCollection']['mods']['note'][0]['\$t'];
+            notes = result['modsCollection']['mods']['note'][0]['\$t'] ?? '-';
           } else if (result['modsCollection']['mods']['note']['\$t'] != null) {
             notes = result['modsCollection']['mods']['note']['\$t'];
           }

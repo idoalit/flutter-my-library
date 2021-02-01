@@ -24,6 +24,7 @@ class DbHelper {
       "notes"	TEXT,
       "source"	TEXT,
       "link"	TEXT,
+      "path" TEXT,
       "created_at"	TEXT,
       "updated_at"	TEXT,
       PRIMARY KEY("id" AUTOINCREMENT)
@@ -42,6 +43,9 @@ class DbHelper {
     '''
   ];
   static const migrationScripts = [
+    '''
+    ALTER TABLE biblio ADD COLUMN path TEXT;
+    ''',
     '''
       CREATE TABLE "server" (
         "id" INTEGER,

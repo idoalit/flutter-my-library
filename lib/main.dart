@@ -22,7 +22,7 @@ Future<void> main() async {
 
   // initialize file download
   WidgetsFlutterBinding.ensureInitialized();
-  await FlutterDownloader.initialize(debug: true);
+  await FlutterDownloader.initialize(debug: false);
 
   runApp(
       // Provide the model to all widgets within the app. We're using

@@ -36,6 +36,7 @@ dependencies:
   xml2json:
   fluttertoast:
   cached_network_image:
+  double_back_to_close_app:
 
 dev_dependencies:
   flutter_test:

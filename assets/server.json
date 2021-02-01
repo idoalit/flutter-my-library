@@ -1,7 +1,7 @@
 [
   {
-    "name": "Server lokal",
-    "url": "http://192.168.1.4/v9.slims",
+    "name": "Ciseeng Library",
+    "url": "http://ciseeng.web.id/slims",
     "type": "slims"
   }
 ]

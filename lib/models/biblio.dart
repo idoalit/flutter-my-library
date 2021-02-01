@@ -13,6 +13,7 @@ class Biblio {
   String _source;
   String _link;
   String _image;
+  String _path;
 
   // constructor
   Biblio(this._id);
@@ -102,7 +103,12 @@ class Biblio {
     _image = value;
   }
 
-  // map conversion
+  String get path => _path;
+
+  set path(String value) {
+    _path = value;
+
+  } // map conversion
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = Map<String, dynamic>();
     map['id'] = this._id;
@@ -119,6 +125,7 @@ class Biblio {
     map['notes'] = notes;
     map['link'] = link;
     map['image'] = image;
+    map['path'] = path;
     if (this._id == null)
       map['created_at'] = (new DateTime.now()).toIso8601String();
     map['updated_at'] = (new DateTime.now()).toIso8601String();
@@ -144,24 +151,26 @@ class Biblio {
     this._source = map['source'];
     this._link = map['link'];
     this._image = map['image'];
+    this._path = map['path'];
   }
 
   Biblio.fromSLiMS(Map<String, dynamic> map) {
     this._id = map['ID'] != null ? int.parse(map['ID']) : null;
-    var subtitle = (map['titleInfo']['subTitle'] != null) ? (map['titleInfo']['subTitle']['\$t'] ?? map['titleInfo']['subTitle']['__cdata']) : '';
-    this._title = (map['titleInfo']['title']['\$t'] ?? map['titleInfo']['title']['__cdata']) + ' ' + subtitle;
+    // var subtitle = (map['titleInfo']['subTitle'] != null) ? (map['titleInfo']['subTitle']['\$t'] ?? map['titleInfo']['subTitle']['__cdata']) : '';
+    var subtitle = _getValue(map, 'titleInfo.subTitle', '');
+    this._title = _getValue(map, 'titleInfo.title', '-') + ' ' + subtitle;
 
     if (map['originInfo']['place']['publisher'] != null) {
       // result search
-      this._publisher = map['originInfo']['place']['publisher']['\$t'] ?? map['originInfo']['place']['publisher']['__cdata'];
-      this._publishYear = map['originInfo']['place']['dateIssued']['\$t'] ?? map['originInfo']['place']['dateIssued']['__cdata'];
+      this._publisher = _getValue(map, 'originInfo.place.publisher', '-');
+      this._publishYear = _getValue(map, 'originInfo.place.dateIssued', '-');
     } else {
       // result detail
-      this._publisher = map['originInfo']['publisher']['\$t'] ?? map['originInfo']['publisher']['__cdata'];
-      this._publishYear = map['originInfo']['dateIssued']['\$t'] ?? map['originInfo']['dateIssued']['__cdata'];
+      this._publisher = _getValue(map, 'originInfo.publisher', '-');
+      this._publishYear = _getValue(map, 'originInfo.dateIssued', '-');
     }
 
-    this._isbn = map['identifier']['\$t'] ?? map['identifier']['__cdata'];
+    this._isbn = _getValue(map, 'identifier', '-');
 
     var authors = [];
     for(var i = 0; i < map['name'].length; i++) {
@@ -189,6 +198,41 @@ class Biblio {
 
     // default type as book
     this._type = 'Book';
-    this._image = map['slims\$image']['\$t'] ?? map['image']['__cdata'];
+
+    if(map['slims\$image'] != null) {
+      this._image = map['slims\$image']['\$t'];
+    } else if(map['image'] != null) {
+      this._image = map['image']['__cdata'];
+    }
+  }
+
+  _getValue(Map<String, dynamic> map, String dotKeys, String _default) {
+    List<dynamic> keys = dotKeys.split('.').toList();
+
+    Map<String, dynamic> tmp;
+    String value;
+    for(var i = 0; i < keys.length; i++) {
+
+      if (i < 1 && map[keys[i]] is! String) {
+        tmp = map[keys[i]];
+        continue;
+      }
+
+      if(tmp[keys[i]] != null && tmp[keys[i]] is! String) {
+        tmp = tmp[keys[i]];
+      }
+    }
+
+
+
+    if(tmp['\$t'] != null) {
+      value = tmp['\$t'];
+    } else if (tmp['__cdata'] != null) {
+      value = tmp['__cdata'];
+    } else {
+      value = _default;
+    }
+
+    return value;
   }
 }
