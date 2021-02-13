@@ -29,6 +29,8 @@ class _ServerState extends State {
   List<ServerModel> _serverList;
   int count = 0;
 
+  String _selection;
+
   void refresh() {
     onUpdateListView();
   }
@@ -65,14 +67,51 @@ class _ServerState extends State {
               Chip(label: Text(_serverList[index].type))
             ],
           ),
-          trailing: IconButton(
-            icon: Icon(Icons.edit_rounded),
-            onPressed: () async {
-              await Navigator.push(context, MaterialPageRoute(builder: (context) {
-                return FormServer(_serverList[index]);
-              }));
-              refresh();
+          trailing: PopupMenuButton<String>(
+            onSelected: (String value) async {
+              switch(value) {
+                case 'search':
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return SearchContainer(_serverList[index]);
+                  }));
+                  break;
+                case 'edit':
+                    await Navigator.push(context, MaterialPageRoute(builder: (context) {
+                      return FormServer(_serverList[index]);
+                    }));
+                    refresh();
+                  break;
+                case 'delete':
+                    _showMyDialog(_serverList[index]);
+                  break;
+              }
             },
+            child: IconButton(
+              icon: Icon(Icons.more_vert_rounded),
+            ),
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+              const PopupMenuItem<String>(
+                value: 'search',
+                child: ListTile(
+                  leading: Icon(Icons.search, color: Colors.blue,),
+                  title: Text('Search collection'),
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'edit',
+                child: ListTile(
+                  leading: Icon(Icons.edit, color: Colors.blue,),
+                  title: Text('Edit'),
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'delete',
+                child: ListTile(
+                  leading: Icon(Icons.delete, color: Colors.red,),
+                  title: Text('Delete'),
+                ),
+              ),
+            ],
           ),
           onTap: () {
             Navigator.push(context, MaterialPageRoute(builder: (context) {
@@ -82,6 +121,29 @@ class _ServerState extends State {
         ),
       );
     }, itemCount: count,);
+  }
+
+  Future<void> _showMyDialog(ServerModel serverModel) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Delete Server'),
+          content: Text('Are you sure to delete this server?'),
+          actions: <Widget>[
+            TextButton(onPressed: () {
+              Navigator.of(context).pop();
+            }, child: Text('Cancel')),
+            TextButton(onPressed: () async {
+              await ServerHelper().delete(serverModel.id);
+              Navigator.of(context).pop();
+              refresh();
+            }, child: Text('Yes, please!'))
+          ],
+        );;
+      },
+    );
   }
 
   Center _createEmptyView() {
@@ -112,7 +174,7 @@ class _ServerState extends State {
 
       // TODO: remove code below if you don't want to add sample server data
       if(list.length < 1) {
-        addSampleServer();
+        // addSampleServer();
       }
     });
   }

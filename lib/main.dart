@@ -5,6 +5,7 @@
 import 'package:bibliography/helpers/dbhelper.dart';
 import 'package:bibliography/models/biblio.dart';
 import 'package:bibliography/models/server.dart';
+import 'package:bibliography/ui/Activation.dart';
 import 'package:bibliography/ui/FormServer.dart';
 import 'package:bibliography/ui/Search.dart';
 import 'package:bibliography/ui/Setting.dart';
@@ -62,6 +63,9 @@ class MyHomePage extends StatelessWidget {
 
     Server pageServer = Server();
     Home pageHome = Home();
+
+    // jika belum melakukan aktivasi akan diarahkan untuk melakukan aktivasi terlebih dahulu
+    if (true) return Activation();
 
     return Scaffold(
       appBar: AppBar(
