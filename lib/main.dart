@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:bibliography/helpers/StatefulWrapper.dart';
 import 'package:bibliography/helpers/dbhelper.dart';
 import 'package:bibliography/models/biblio.dart';
 import 'package:bibliography/models/server.dart';
@@ -16,6 +17,7 @@ import 'package:bibliography/view_model/server_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'view_model/router.dart';
 
@@ -64,10 +66,23 @@ class MyHomePage extends StatelessWidget {
     Server pageServer = Server();
     Home pageHome = Home();
 
-    // jika belum melakukan aktivasi akan diarahkan untuk melakukan aktivasi terlebih dahulu
-    if (true) return Activation();
+    return StatefulWrapper(onInit: () async {
 
-    return Scaffold(
+      final prefs = await SharedPreferences.getInstance();
+      int activation = prefs.getInt('activated') ?? 0;
+
+      print(activation);
+
+      // jika belum melakukan aktivasi akan diarahkan untuk melakukan aktivasi terlebih dahulu
+      if (activation < 1) {
+
+        Navigator.push(context, MaterialPageRoute(builder: (context) {
+          return Activation();
+        }));
+
+      }
+
+    }, child: Scaffold(
       appBar: AppBar(
         title: Consumer<PageRouter>(
           builder: (context, router, child) {
@@ -114,10 +129,10 @@ class MyHomePage extends StatelessWidget {
           var result = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) {
-              
+
               var router = Provider.of<PageRouter>(context);
               if(router.currentPage == PageRouter.SERVER_PAGE) return FormServer(null);
-              
+
               return EntryForm(null);
             }),
           );
@@ -183,7 +198,7 @@ class MyHomePage extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 }
 

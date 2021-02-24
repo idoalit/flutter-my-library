@@ -37,6 +37,7 @@ dependencies:
   fluttertoast:
   cached_network_image:
   double_back_to_close_app:
+  shared_preferences:
 
 dev_dependencies:
   flutter_test:
