@@ -174,7 +174,7 @@ class _ServerState extends State {
 
       // TODO: remove code below if you don't want to add sample server data
       if(list.length < 1) {
-        // addSampleServer();
+        addSampleServer();
       }
     });
   }

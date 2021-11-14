@@ -56,9 +56,23 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
+
+  _StateMyHomePage _myHomePageState;
+
+  @override
+  State<StatefulWidget> createState() {
+    _myHomePageState = _StateMyHomePage();
+    return _myHomePageState;
+  }
+
+  getState() => _myHomePageState;
+}
+
+class _StateMyHomePage extends State<MyHomePage> {
 
   final PageController _pageController = PageController();
+  Color _currentColor = Colors.lightGreen;
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +88,8 @@ class MyHomePage extends StatelessWidget {
       print(activation);
 
       // jika belum melakukan aktivasi akan diarahkan untuk melakukan aktivasi terlebih dahulu
-      if (activation < 1) {
+      // if (activation < 1) {
+      if(false) {
 
         Navigator.push(context, MaterialPageRoute(builder: (context) {
           return Activation();
@@ -153,6 +168,7 @@ class MyHomePage extends StatelessWidget {
         tooltip: 'Increment',
         child: Icon(Icons.add),
         elevation: 2.0,
+        backgroundColor: this._currentColor,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
@@ -166,6 +182,9 @@ class MyHomePage extends StatelessWidget {
               icon: Icon(Icons.local_library_rounded),
               color: Colors.lightGreen,
               onPressed: () {
+                setState(() {
+                  _currentColor = Colors.lightGreen;
+                });
                 _pageController.jumpToPage(PageRouter.HOME_PAGE);
                 context.read<PageRouter>().goto(PageRouter.HOME_PAGE);
               },
@@ -174,6 +193,9 @@ class MyHomePage extends StatelessWidget {
               icon: Icon(Icons.location_city_rounded),
               color: Colors.redAccent,
               onPressed: () {
+                setState(() {
+                  _currentColor = Colors.redAccent;
+                });
                 _pageController.jumpToPage(PageRouter.SERVER_PAGE);
                 context.read<PageRouter>().goto(PageRouter.SERVER_PAGE);
               },
@@ -183,6 +205,9 @@ class MyHomePage extends StatelessWidget {
               icon: Icon(Icons.search_rounded),
               color: Colors.deepOrange,
               onPressed: () {
+                setState(() {
+                  _currentColor = Colors.lightGreen;
+                });
                 _pageController.jumpToPage(PageRouter.SEARCH_PAGE);
                 context.read<PageRouter>().goto(PageRouter.SEARCH_PAGE);
               },
@@ -191,6 +216,9 @@ class MyHomePage extends StatelessWidget {
               icon: Icon(Icons.settings_rounded),
               color: Colors.indigoAccent,
               onPressed: () {
+                setState(() {
+                  _currentColor = Colors.lightGreen;
+                });
                 _pageController.jumpToPage(PageRouter.SETTING_PAGE);
                 context.read<PageRouter>().goto(PageRouter.SETTING_PAGE);
               },

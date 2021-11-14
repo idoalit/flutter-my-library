@@ -105,7 +105,7 @@ class ActivationState extends State<Activation> {
 
   Future<Code> requestActivation(String code) async {
     final response = await http.post(
-      Uri.http('192.168.100.4:8000', 'activation'),
+      Uri.http('192.168.100.2:8000', 'activation'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

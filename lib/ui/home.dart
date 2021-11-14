@@ -73,7 +73,7 @@ class _HomeState extends State<Home> {
 
   ListView createListView() {
     // ignore: deprecated_member_use
-    TextStyle textStyle = Theme.of(context).textTheme.subhead;
+    TextStyle textStyle = Theme.of(context).textTheme.subtitle1;
 
     return ListView.builder(
       itemBuilder: (BuildContext context, int index) {
