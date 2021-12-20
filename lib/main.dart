@@ -8,8 +8,10 @@ import 'package:bibliography/models/biblio.dart';
 import 'package:bibliography/models/server.dart';
 import 'package:bibliography/ui/Activation.dart';
 import 'package:bibliography/ui/FormServer.dart';
+import 'package:bibliography/ui/Help.dart';
 import 'package:bibliography/ui/Search.dart';
 import 'package:bibliography/ui/Setting.dart';
+import 'package:bibliography/ui/Splash.dart';
 import 'package:bibliography/ui/entryform.dart';
 import 'package:bibliography/ui/home.dart';
 import 'package:bibliography/ui/Server.dart';
@@ -47,11 +49,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'My Library',
+      title: 'Perpustakaan Yarsi',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(),
+      home: SplashScreen(),
     );
   }
 }
@@ -85,14 +87,14 @@ class _StateMyHomePage extends State<MyHomePage> {
       final prefs = await SharedPreferences.getInstance();
       int activation = prefs.getInt('activated') ?? 0;
 
-      print(activation);
+      // print(activation);
 
       // jika belum melakukan aktivasi akan diarahkan untuk melakukan aktivasi terlebih dahulu
       // if (activation < 1) {
       if(false) {
 
         Navigator.push(context, MaterialPageRoute(builder: (context) {
-          return Activation();
+          return SplashScreen();
         }));
 
       }
@@ -213,14 +215,15 @@ class _StateMyHomePage extends State<MyHomePage> {
               },
             ),
             IconButton(
-              icon: Icon(Icons.settings_rounded),
+              icon: Icon(Icons.help_outline),
               color: Colors.indigoAccent,
               onPressed: () {
                 setState(() {
                   _currentColor = Colors.lightGreen;
                 });
-                _pageController.jumpToPage(PageRouter.SETTING_PAGE);
-                context.read<PageRouter>().goto(PageRouter.SETTING_PAGE);
+                // _pageController.jumpToPage(PageRouter.SETTING_PAGE);
+                // context.read<PageRouter>().goto(PageRouter.SETTING_PAGE);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => HelpScreen()));
               },
             ),
           ],
